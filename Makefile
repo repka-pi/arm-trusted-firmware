@@ -337,6 +337,11 @@ else
         LOG_LEVEL	:=	20
 endif
 
+ifeq (${SILENT}, 1)
+	# Disable logs in silent mod
+	LOG_LEVEL	=	0
+endif
+
 # Default build string (git branch and commit)
 ifeq (${BUILD_STRING},)
         BUILD_STRING  :=  $(shell git describe --always --dirty --tags 2> /dev/null)
@@ -439,6 +444,7 @@ else ifneq ($(findstring gcc,$(notdir $(LD))),)
 # Pass ld options with Wl or Xlinker switches
 TF_LDFLAGS		+=	-Wl,--fatal-warnings -O1
 TF_LDFLAGS		+=	-Wl,--gc-sections
+TF_LDFLAGS		+=	-Wl,--no-warn-rwx-segment
 ifeq ($(ENABLE_LTO),1)
 	ifeq (${ARCH},aarch64)
 		TF_LDFLAGS	+=	-flto -fuse-linker-plugin
@@ -456,6 +462,7 @@ TF_LDFLAGS		+=	$(subst --,-Xlinker --,$(TF_LDFLAGS_$(ARCH)))
 else
 TF_LDFLAGS		+=	--fatal-warnings -O1
 TF_LDFLAGS		+=	--gc-sections
+TF_LDFLAGS		+=	--no-warn-rwx-segment
 # ld.lld doesn't recognize the errata flags,
 # therefore don't add those in that case
 ifeq ($(findstring ld.lld,$(notdir $(LD))),)
@@ -985,6 +992,7 @@ $(eval $(call assert_booleans,\
         CTX_INCLUDE_EL2_REGS \
         CTX_INCLUDE_NEVE_REGS \
         DEBUG \
+        SILENT \
         DISABLE_MTPMU \
         DYN_DISABLE_AUTH \
         EL3_EXCEPTION_HANDLING \
